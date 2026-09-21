@@ -32,6 +32,9 @@ dependencies {
     // Autenticação e senha protegida (CP2)
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
+    // Emissão e validação de JWT (CP3)
+    implementation 'org.springframework.boot:spring-boot-starter-security-oauth2-resource-server'
+
     // Sobe o Postgres via Docker automaticamente ao rodar a aplicação
     developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
 

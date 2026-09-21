@@ -18,7 +18,7 @@ Projeto do desafio **Java Advanced — Projeto Diamante 1**.
 
 - [x] **CP1** — Ambiente sobe via Docker; primeira migration com o schema inicial
 - [x] **CP2** — Cadastro e autenticação (senha protegida)
-- [ ] CP3 — Emissão e validação de token JWT nos endpoints protegidos
+- [x] **CP3** — Emissão e validação de token JWT nos endpoints protegidos
 - [ ] CP4 — Regras de autorização por papel (ADMIN / USER)
 - [ ] CP5 — Integração com serviço externo (CEP) e revisão final
 
@@ -69,7 +69,7 @@ curl -X POST http://localhost:8080/users \
   -d '{"name":"Lucas","email":"lucas@fiap.com.br","password":"senha123"}'
 ```
 
-**Login (confirma as credenciais, sem token ainda)**
+**Login (agora retorna um JWT)**
 
 ```bash
 curl -X POST http://localhost:8080/auth/login \
@@ -77,6 +77,35 @@ curl -X POST http://localhost:8080/auth/login \
   -d '{"email":"lucas@fiap.com.br","password":"senha123"}'
 ```
 
-> As entidades de Gig/Contratação, a emissão de JWT, as regras de
-> autorização por papel e a integração com CEP chegam nos próximos
-> checkpoints.
+Resposta:
+
+```json
+{
+  "id": 1,
+  "name": "Lucas",
+  "email": "lucas@fiap.com.br",
+  "role": "USER",
+  "token": "eyJhbGciOiJSUzI1NiJ9..."
+}
+```
+
+## Autenticação JWT (CP3)
+
+O token é assinado com um par de chaves RSA (RS256), gerado em memória a
+cada subida da aplicação — não depende de arquivo de chave versionado no
+repositório. O login (acima) emite o token; qualquer outro endpoint além
+de `POST /users` e `POST /auth/login` agora exige esse token no header
+`Authorization`.
+
+**Chamando um endpoint protegido**
+
+```bash
+curl http://localhost:8080/users/me \
+  -H "Authorization: Bearer eyJhbGciOiJSUzI1NiJ9..."
+```
+
+Sem o header (ou com um token inválido/expirado), a API responde
+`401 Unauthorized`.
+
+> As entidades de Gig/Contratação, as regras de autorização por papel e a
+> integração com CEP chegam nos próximos checkpoints.

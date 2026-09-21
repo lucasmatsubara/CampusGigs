@@ -2,10 +2,14 @@ package br.com.fiap.campusgigs.domain.user;
 
 import br.com.fiap.campusgigs.domain.user.dto.RegisterRequest;
 import br.com.fiap.campusgigs.domain.user.dto.UserResponse;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,5 +39,13 @@ public class UserController {
                 .build();
 
         return UserResponse.from(userRepository.save(user));
+    }
+
+    @GetMapping("/me")
+    public UserResponse me(@AuthenticationPrincipal Jwt jwt) {
+        User user = userRepository.findByEmail(jwt.getSubject())
+                .orElseThrow(() -> new EntityNotFoundException("Usuario nao encontrado"));
+
+        return UserResponse.from(user);
     }
 }

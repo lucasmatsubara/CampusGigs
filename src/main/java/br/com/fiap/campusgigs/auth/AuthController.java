@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
+    private final TokenService tokenService;
 
     @PostMapping("/login")
     public LoginResponse login(@RequestBody @Valid LoginRequest request) {
@@ -27,7 +28,8 @@ public class AuthController {
         );
 
         User user = (User) auth.getPrincipal();
+        String token = tokenService.generateToken(user);
 
-        return new LoginResponse(user.getId(), user.getName(), user.getEmail(), user.getRole().name());
+        return new LoginResponse(user.getId(), user.getName(), user.getEmail(), user.getRole().name(), token);
     }
 }
