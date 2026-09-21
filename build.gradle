@@ -29,6 +29,9 @@ dependencies {
     implementation 'org.flywaydb:flyway-database-postgresql'
     runtimeOnly 'org.postgresql:postgresql'
 
+    // Autenticação e senha protegida (CP2)
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
     // Sobe o Postgres via Docker automaticamente ao rodar a aplicação
     developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
 

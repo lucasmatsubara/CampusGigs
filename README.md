@@ -17,7 +17,7 @@ Projeto do desafio **Java Advanced — Projeto Diamante 1**.
 ## Status do projeto (checkpoints)
 
 - [x] **CP1** — Ambiente sobe via Docker; primeira migration com o schema inicial
-- [ ] CP2 — Cadastro e autenticação (senha protegida)
+- [x] **CP2** — Cadastro e autenticação (senha protegida)
 - [ ] CP3 — Emissão e validação de token JWT nos endpoints protegidos
 - [ ] CP4 — Regras de autorização por papel (ADMIN / USER)
 - [ ] CP5 — Integração com serviço externo (CEP) e revisão final
@@ -52,5 +52,31 @@ docker exec -it postgres_campus_gigs psql -U campusgigs -d campusgigs -c "\dt"
   (`requester_id`): situação (`SOLICITADA`, `ACEITA`, `CONCLUIDA`,
   `CANCELADA`)
 
-> As entidades JPA, os endpoints e as regras de negócio chegam nos
-> próximos checkpoints.
+## Cadastro e login (CP2)
+
+A senha nunca é salva em texto puro: no cadastro ela é protegida com
+BCrypt (`PasswordEncoder`) antes de ir para o banco. O login usa o
+`AuthenticationManager` do Spring Security, que busca o usuário pelo
+e-mail e compara a senha informada com o hash salvo — se não bater,
+retorna erro automaticamente. Ainda não há emissão de token; isso é
+o CP3.
+
+**Cadastrar usuário**
+
+```bash
+curl -X POST http://localhost:8080/users \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Lucas","email":"lucas@fiap.com.br","password":"senha123"}'
+```
+
+**Login (confirma as credenciais, sem token ainda)**
+
+```bash
+curl -X POST http://localhost:8080/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"lucas@fiap.com.br","password":"senha123"}'
+```
+
+> As entidades de Gig/Contratação, a emissão de JWT, as regras de
+> autorização por papel e a integração com CEP chegam nos próximos
+> checkpoints.
