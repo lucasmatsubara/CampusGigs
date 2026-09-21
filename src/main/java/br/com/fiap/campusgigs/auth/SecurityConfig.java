@@ -9,6 +9,7 @@ import com.nimbusds.jose.proc.SecurityContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -41,10 +42,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    // Só isto entra pelo construtor. As chaves RSA NAO entram aqui: elas sao
-    // produzidas por metodos @Bean desta mesma classe, e pedi-las no
-    // construtor cria uma dependencia circular (a classe precisaria de si
-    // mesma para ser criada).
     private final UserDetailsService userDetailsService;
 
     @Bean
@@ -82,6 +79,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/users", "/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/gigs", "/gigs/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2

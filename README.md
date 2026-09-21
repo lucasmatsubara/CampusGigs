@@ -19,7 +19,7 @@ Projeto do desafio **Java Advanced — Projeto Diamante 1**.
 - [x] **CP1** — Ambiente sobe via Docker; primeira migration com o schema inicial
 - [x] **CP2** — Cadastro e autenticação (senha protegida)
 - [x] **CP3** — Emissão e validação de token JWT nos endpoints protegidos
-- [ ] CP4 — Regras de autorização por papel (ADMIN / USER)
+- [x] **CP4** — Regras de autorização por papel (ADMIN / USER)
 - [ ] CP5 — Integração com serviço externo (CEP) e revisão final
 
 ## Como rodar (CP1)
@@ -107,5 +107,72 @@ curl http://localhost:8080/users/me \
 Sem o header (ou com um token inválido/expirado), a API responde
 `401 Unauthorized`.
 
-> As entidades de Gig/Contratação, as regras de autorização por papel e a
-> integração com CEP chegam nos próximos checkpoints.
+## Gigs e contratações (CP4)
+
+Regras de autorização:
+
+- **Publicar um gig** (`POST /gigs`) — qualquer usuário autenticado
+- **Listar gigs** (`GET /gigs`, `GET /gigs/{id}`) — público, não exige token
+- **Contratar um gig** (`POST /hirings`) — qualquer usuário autenticado,
+  desde que o gig esteja `ATIVO` e **não seja o próprio usuário o dono do
+  gig** (senão, `409 Conflict`)
+- **Encerrar um gig** (`PATCH /gigs/{id}/close`) — só o **dono** do gig ou
+  um usuário **ADMIN** (senão, `403 Forbidden`)
+
+Todo cadastro novo nasce com papel `USER`. Para testar a regra do ADMIN,
+promova um usuário direto no banco:
+
+```bash
+docker exec -it postgres_campus_gigs psql -U campusgigs -d campusgigs \
+  -c "UPDATE users SET role = 'ADMIN' WHERE email = 'lucas@fiap.com.br';"
+```
+
+**Publicar um gig**
+
+```bash
+curl -X POST http://localhost:8080/gigs \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <token>" \
+  -d '{"title":"Aula de Java","description":"Reforço para prova","category":"Aulas","price":50.00}'
+```
+
+**Listar gigs (sem token)**
+
+```bash
+curl http://localhost:8080/gigs
+```
+
+**Contratar um gig**
+
+```bash
+curl -X POST http://localhost:8080/hirings \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <token-de-outro-usuario>" \
+  -d '{"gigId":1}'
+```
+
+**Encerrar um gig que não é seu (evidência de acesso negado por papel)**
+
+```bash
+curl -X PATCH http://localhost:8080/gigs/1/close \
+  -H "Authorization: Bearer <token-de-quem-nao-e-dono-nem-admin>"
+```
+
+Resposta esperada — `403 Forbidden`:
+
+```json
+{
+  "timestamp": "2026-09-21T02:00:00Z",
+  "status": 403,
+  "error": "Forbidden",
+  "message": "Voce nao tem permissao para realizar esta acao",
+  "path": "/gigs/1/close"
+}
+```
+
+Todo erro da API (validação, autorização, regra de negócio, recurso não
+encontrado) passa pelo `GlobalExceptionHandler` e volta nesse formato —
+nunca com stack trace.
+
+> A integração com o serviço de CEP e a revisão final chegam no próximo
+> checkpoint.
