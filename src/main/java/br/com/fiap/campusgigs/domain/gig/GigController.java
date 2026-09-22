@@ -61,6 +61,6 @@ public class GigController {
 
     private Gig findGigOrThrow(Long id) {
         return gigRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Gig nao encontrado: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Gig não encontrado: " + id));
     }
 }

@@ -7,17 +7,17 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 public record GigRequest(
-        @NotBlank(message = "O titulo e obrigatorio")
+        @NotBlank(message = "O título é obrigatório")
         String title,
 
-        @NotBlank(message = "A descricao e obrigatoria")
+        @NotBlank(message = "A descrição é obrigatória")
         String description,
 
-        @NotBlank(message = "A categoria e obrigatoria")
+        @NotBlank(message = "A categoria é obrigatória")
         String category,
 
-        @NotNull(message = "O preco e obrigatorio")
-        @DecimalMin(value = "0.0", message = "O preco nao pode ser negativo")
+        @NotNull(message = "O preço é obrigatório")
+        @DecimalMin(value = "0.0", message = "O preço não pode ser negativo")
         BigDecimal price
 ) {
 }

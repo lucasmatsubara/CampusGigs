@@ -26,13 +26,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiError> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(ApiError.of(HttpStatus.FORBIDDEN, "Voce nao tem permissao para realizar esta acao", request.getRequestURI()));
+                .body(ApiError.of(HttpStatus.FORBIDDEN, "Voce nao tem permissão para realizar esta ação", request.getRequestURI()));
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiError> handleBadCredentials(BadCredentialsException ex, HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(ApiError.of(HttpStatus.UNAUTHORIZED, "E-mail ou senha invalidos", request.getRequestURI()));
+                .body(ApiError.of(HttpStatus.UNAUTHORIZED, "E-mail ou senha inválidos", request.getRequestURI()));
     }
 
     @ExceptionHandler(BusinessException.class)

@@ -22,7 +22,7 @@ public record ApiError(
                 Instant.now(),
                 HttpStatus.BAD_REQUEST.value(),
                 HttpStatus.BAD_REQUEST.getReasonPhrase(),
-                "Erro de validacao nos dados enviados",
+                "Erro de validação nos dados enviados",
                 path,
                 fields
         );

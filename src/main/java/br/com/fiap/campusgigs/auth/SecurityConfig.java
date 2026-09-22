@@ -97,7 +97,7 @@ public class SecurityConfig {
             generator.initialize(2048);
             return generator.generateKeyPair();
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("Nao foi possivel gerar o par de chaves RSA", e);
+            throw new IllegalStateException("Não foi possível gerar o par de chaves RSA", e);
         }
     }
 

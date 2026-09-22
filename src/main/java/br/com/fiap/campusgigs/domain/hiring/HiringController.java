@@ -31,16 +31,16 @@ public class HiringController {
     @ResponseStatus(HttpStatus.CREATED)
     public HiringResponse hire(@RequestBody @Valid HiringRequest request) {
         Gig gig = gigRepository.findById(request.gigId())
-                .orElseThrow(() -> new EntityNotFoundException("Gig nao encontrado: " + request.gigId()));
+                .orElseThrow(() -> new EntityNotFoundException("Gig não encontrado: " + request.gigId()));
 
         User requester = authorizationService.currentUser();
 
         if (gig.getStatus() != GigStatus.ATIVO) {
-            throw new BusinessException("Este gig nao esta ativo e nao pode ser contratado");
+            throw new BusinessException("Este gig não está ativo e não pode ser contratado");
         }
 
         if (gig.getProvider().getId().equals(requester.getId())) {
-            throw new BusinessException("Voce nao pode contratar o proprio gig");
+            throw new BusinessException("Você não pode contratar o próprio gig");
         }
 
         Hiring hiring = Hiring.builder()

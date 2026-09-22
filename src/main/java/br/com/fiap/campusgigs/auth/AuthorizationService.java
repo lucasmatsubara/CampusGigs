@@ -20,7 +20,7 @@ public class AuthorizationService {
         Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         return userRepository.findByEmail(jwt.getSubject())
-                .orElseThrow(() -> new EntityNotFoundException("Usuario autenticado nao encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException("Usuário autenticado não encontrado"));
     }
 
     public boolean isAdmin() {
@@ -32,7 +32,7 @@ public class AuthorizationService {
 
         boolean isOwner = current.getId().equals(ownerId);
         if (!isOwner && current.getRole() != Role.ADMIN) {
-            throw new AccessDeniedException("Voce nao tem permissao para realizar esta acao");
+            throw new AccessDeniedException("Você não tem permissão para realizar esta ação");
         }
     }
 }
