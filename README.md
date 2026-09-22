@@ -20,7 +20,7 @@ Projeto do desafio **Java Advanced — Projeto Diamante 1**.
 - [x] **CP2** — Cadastro e autenticação (senha protegida)
 - [x] **CP3** — Emissão e validação de token JWT nos endpoints protegidos
 - [x] **CP4** — Regras de autorização por papel (ADMIN / USER)
-- [ ] CP5 — Integração com serviço externo (CEP) e revisão final
+- [x] **CP5** — Integração com serviço externo (CEP) e revisão final
 
 ## Como rodar (CP1)
 
@@ -174,5 +174,92 @@ Todo erro da API (validação, autorização, regra de negócio, recurso não
 encontrado) passa pelo `GlobalExceptionHandler` e volta nesse formato —
 nunca com stack trace.
 
-> A integração com o serviço de CEP e a revisão final chegam no próximo
-> checkpoint.
+## Integração com CEP (CP5)
+
+O endereço (`street`, `city`, `state`) é preenchido automaticamente a
+partir do CEP, consultando a **ViaCEP** através de um cliente HTTP
+declarativo do Spring (`@HttpExchange` + `@ImportHttpServices` — sem
+`RestTemplate`/`WebClient` manual). Isso acontece em dois momentos:
+
+- **No cadastro** (`POST /users`) — campo `cep` é opcional
+- **A qualquer momento depois** (`PATCH /users/me/cep`) — atualiza o CEP
+  do usuário logado
+
+Se o CEP não existir, a API responde com erro (não deixa o cadastro
+"pela metade" sem avisar):
+
+```bash
+curl -X POST http://localhost:8080/users \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Ana","email":"ana@fiap.com.br","password":"senha123","cep":"00000000"}'
+```
+
+```json
+{
+  "timestamp": "2026-09-21T02:10:00Z",
+  "status": 409,
+  "error": "Conflict",
+  "message": "CEP nao encontrado: 00000000",
+  "path": "/users"
+}
+```
+
+Com um CEP válido, o cadastro já vem com o endereço preenchido:
+
+```bash
+curl -X POST http://localhost:8080/users \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Ana","email":"ana@fiap.com.br","password":"senha123","cep":"01001-000"}'
+```
+
+```json
+{
+  "id": 2,
+  "name": "Ana",
+  "email": "ana@fiap.com.br",
+  "role": "USER",
+  "cep": "01001000",
+  "street": "Praça da Sé",
+  "city": "São Paulo",
+  "state": "SP"
+}
+```
+
+**Atualizando o CEP depois**
+
+```bash
+curl -X PATCH http://localhost:8080/users/me/cep \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <token>" \
+  -d '{"cep":"01001-000"}'
+```
+
+## Testes manuais realizados
+
+- [x] Cadastro de usuário com senha protegida (BCrypt)
+- [x] Login retornando JWT válido
+- [x] Endpoint protegido (`GET /users/me`) aceitando token válido e
+  rejeitando requisição sem token (`401`)
+- [x] Publicação e listagem de gigs
+- [x] Contratação de gig de outro usuário (sucesso) e do próprio gig
+  (erro `409`)
+- [x] Encerramento de gig pelo dono (sucesso)
+- [x] **Encerramento de gig por usuário sem permissão — `403 Forbidden`**
+  (evidência de acesso negado por papel)
+- [x] Cadastro/atualização de CEP válido preenchendo o endereço
+  automaticamente
+- [x] CEP inexistente retornando erro claro, sem cadastro incompleto
+
+## Estrutura do projeto
+
+```
+src/main/java/br/com/fiap/campusgigs/
+├── auth/            # login, JWT, autorização (dono/admin)
+├── cep/             # cliente ViaCEP (@HttpExchange) e regras de CEP
+├── config/          # segurança, chaves RSA, JWT
+├── domain/
+│   ├── user/        # cadastro, endereço
+│   ├── gig/         # publicação de serviços
+│   └── hiring/      # contratação de serviços
+└── exception/       # tratamento de erro centralizado
+```
